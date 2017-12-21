@@ -336,3 +336,10 @@ class LeCroyScope(object):
             raise RuntimeError('waveforms out of sync or comm_header is off.')
         wavedesc = self.get_wavedesc(channel)
         return (wavedesc, np.fromstring(msg[22:], wavedesc['dtype'], wavedesc['wave_array_count']))
+
+    def write_wavedesc_to_file(self, wavedesc, out):
+        '''
+        Write the wavedesc to the file out as a packed struct
+        '''
+        
+        

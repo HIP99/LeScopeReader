@@ -1,2 +1,3 @@
-ip = '131.243.31.120'
+ip = 'localhost'
+port = 1861
 timeout = 1000.0

@@ -28,7 +28,7 @@ import config
 from lecroy import LeCroyScope
 
 if __name__ == '__main__':
-    scope = LeCroyScope(config.ip, timeout=config.timeout)
+    scope = LeCroyScope(config.ip, port=config.port, timeout=config.timeout)
     scope.clear()
     settings = scope.get_settings()
     print settings
