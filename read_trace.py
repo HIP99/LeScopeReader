@@ -30,7 +30,7 @@ with open("/unix/creamtea/scopeStuff/test950V_5V_5ns.ch3.traces","rb") as f:
         area=np.trapz(voltList,timeList)
         areaList.append(area)
 
-#    print areaList
+    print len(areaList)
     areaMean=np.mean(areaList)
     areaStd=np.std(areaList)
     print areaMean,areaStd

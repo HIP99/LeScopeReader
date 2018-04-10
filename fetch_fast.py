@@ -30,6 +30,7 @@ import numpy
 import config
 import pickle
 from lecroy import LeCroyScope
+from lecroy import LeCroyWaveformChannel
 
 def fetch(filename, nevents, nsequence):
     '''
@@ -39,6 +40,7 @@ def fetch(filename, nevents, nsequence):
     scope.clear()
     scope.set_sequence_mode(nsequence)
     channels = scope.get_channels()
+    print channels
     settings = scope.get_settings()
 
     if 'ON' in settings['SEQUENCE']:
@@ -62,16 +64,23 @@ def fetch(filename, nevents, nsequence):
             sys.stdout.flush()
             try:
                 scope.trigger()
+                print channels
                 for channel in channels:
-                    wave_desc,wave_array = scope.get_waveform(channel)
-                    print wave_desc
-                    print wave_array
+                    print channel
+                    wave_desc,wave_array,trig_time_array = scope.get_waveform(channel)
                     num_samples = wave_desc['wave_array_count']//sequence_count
                     traces = wave_array.reshape(sequence_count, wave_array.size//sequence_count)
                     out = f[channel]
+                    print num_samples,sequence_count
+                    #New way of writing files
+#                    waveform=LeCroyWaveformChannel(wave_desc,wave_array,trig_time_array)
+#                    waveform.to_file(out)
+#                    waveform.from_file(out)
+                                        
                     for n in xrange(0,sequence_count):
-                        out.write(struct.pack(params_pattern,num_samples,wave_desc['dtype'].itemsize,wave_desc['vertical_offset'], wave_desc['vertical_gain'], -wave_desc['horiz_offset'], wave_desc['horiz_interval']))
-#                        pickle.dump(wave_desc,out)
+                        print "Here",n                    
+                        tempsturct=struct.pack(params_pattern,num_samples,wave_desc['dtype'].itemsize,wave_desc['vertical_offset'], wave_desc['vertical_gain'], -wave_desc['horiz_offset'], wave_desc['horiz_interval'])
+                        out.write(tempsturct)
                         traces[n].tofile(out)
                     
             except (socket.error) as e:
@@ -86,6 +95,7 @@ def fetch(filename, nevents, nsequence):
     finally:
         print '\r', 
         for channel in channels:
+            print "Closing",channel
             f[channel].close()
         scope.clear()
         return i

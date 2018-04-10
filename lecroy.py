@@ -1,3 +1,7 @@
+# LeScopeReader
+# Almost all of the code is really from the people below, minor changes from
+# Copyright (C) 2017 Ryan Nichol
+#
 # LeCrunch2 
 # Copyright (C) 2014 Benjamin Land
 #
@@ -335,11 +339,98 @@ class LeCroyScope(object):
         if not int(msg[1]) == channel:
             raise RuntimeError('waveforms out of sync or comm_header is off.')
         wavedesc = self.get_wavedesc(channel)
-        return (wavedesc, np.fromstring(msg[22:], wavedesc['dtype'], wavedesc['wave_array_count']))
+        if wavedesc['trigtime_array']>0:
+            trigTimeArray=self.get_waveform_time(channel,wavedesc['trigtime_array']/16)
+        return (wavedesc, np.fromstring(msg[22:], wavedesc['dtype'], wavedesc['wave_array_count']),trigTimeArray)
 
-    def write_wavedesc_to_file(self, wavedesc, out):
+    def get_waveform_time(self,channel,numTimes):
         '''
-        Write the wavedesc to the file out as a packed struct
-        '''
+        Capture the time block for a trigger sequence
+        ''' 
+        if channel not in range(1, 5):
+            raise Exception('channel must be in %s.' % str(range(1, 5)))
+
+        self.send('c%s:wf? time' % str(channel))
+
+        msg = self.recv()
+        if not int(msg[1]) == channel:
+            raise RuntimeError('waveforms out of sync or comm_header is off.')
+
+        return np.fromstring(msg[22:], np.dtype('f8'),numTimes)
+    
         
         
+class LeCroyWaveformChannel(object):
+    #{'processing_done': 0, 'wave_array_count': 200200, 'trace_label': '', 'sweeps_per_acq': 1, 'user_text': 0, 'template_name': 'LECROY_2_3', 'bandwidth_limit': 0, 'little_endian': False, 'wave_array_1': 200200, 'wave_array_2': 0, 'res_array1': 0, 'reserved5': 0, 'nominal_bits': 8, 'reserved1': 3592, 'res_array_3': 0, 'reserved2': 3, 'first_valid_pnt': 0, 'timebase': 13, 'res_array_2': 0, 'pixel_offset': -2.7599999999999996e-08, 'fixed_vert_gain': 15, 'last_valid_pnt': 200199, 'instrument_name': 'LECROYWP7300A', 'vertical_gain': 0.004419455770403147, 'segment_index': 0, 'acq_duration': 0.9899966716766357, 'comm_type': 0, 'pnts_per_screen': 200000, 'horiz_offset': -2.7683632705260795e-08, 'nom_subarray_count': 100, 'horiz_interval': 1.000000013351432e-10, 'wave_source': 2, 'subarray_count': 100, 'max_value': 90.0, 'min_value': -91.0, 'trigger_time': (56.20998135000001, 0, 11, 21, 12, 2017, 0), 'vertical_vernier': 1.0, 'acq_vert_offset': 0.0, 'pair_offset': 0, 'probe_att': 1.0, 'vertunit': 'V', 'instrument_number': 13555, 'vert_coupling': 0, 'first_point': 0, 'res_desc1': 0, 'ris_time_array': 0, 'record_type': 0, 'wave_descriptor': 346, 'points_per_pair': 0, 'sparsing_factor': 1, 'ris_sweeps': 1, 'horiz_uncertainty': 9.999999960041972e-13, 'vertical_offset': 0.0, 'descriptor_name': 'WAVEDESC', 'trigtime_array': 1600, 'dtype': 0, 'horunit': 'S', 'comm_order': 1}
+
+    params_pattern = '=IBdddd' # (num_samples, sample_bytes, v_off, v_scale, h_off, h_scale, [samples]) ...
+
+    '''
+    A class for storing and reading LeCroyWaveforms from a file
+    '''
+    def __init__(self, wavedesc, waveform,trigTimeArray):
+        '''
+        Initialise class with waveform and description
+        '''
+        self.wavedesc=wavedesc
+        self.waveform=waveform
+        self.trigTimeArray=trigTimeArray
+        
+
+
+    def to_file(self,out):
+        '''
+        Write waveform to file
+        '''
+#        out.write(struct.pack(params_pattern,num_samples,wave_desc['dtype'].itemsize,wave_desc['vertical_offset'], wave_desc['vertical_gain'], -wave_desc['horiz_offset'], wave_desc['horiz_interval']))
+        endian = '<'
+        if self.wavedesc['little_endian'] == True:
+            endian = '>'
+        self.buffer=""
+
+        for name, pos, datatype in wavedesc_template:
+           # print name,self.wavedesc[name]
+            if datatype in (String, UnitDefinition):
+                print self.wavedesc[name],datatype.length,len(self.wavedesc[name])
+            elif datatype in (TimeStamp,):
+                self.buffer+=struct.pack(endian+datatype.packfmt, *list(self.wavedesc[name]))
+            else:
+                self.buffer+=struct.pack(endian+datatype.packfmt, self.wavedesc[name])
+
+        out.write(self.buffer)
+        print len(self.waveform)
+        self.waveform.tofile(out)
+
+        print len(self.trigTimeArray)
+        self.trigTimeArray.tofile(out)
+
+
+    def from_file(self,inputFile):
+        '''
+        Read waveform from file
+        '''
+        self.wavedesc={}
+        endian = '<'
+#        data = StringIO.StringIO(self.buffer)
+
+        for name, pos, datatype in wavedesc_template:
+            if datatype in (String, UnitDefinition):
+                print name
+                #wavedesc[name] = raw.rstrip('\x00')
+            elif datatype in (TimeStamp,):
+                raw = inputFile.read(datatype.length)
+                self.wavedesc[name] = struct.unpack(endian+datatype.packfmt, raw)
+            else:
+                raw = inputFile.read(datatype.length)
+                self.wavedesc[name] = struct.unpack(endian+datatype.packfmt, raw)[0]
+        
+        print self.wavedesc
+        
+        dt=np.dtype('>i1')
+        dataList=np.fromfile(inputFile,dt,self.wavedesc['wave_array_count'])
+
+
+        
+        
+
+

@@ -9,7 +9,8 @@ struct_size = calcsize(params_pattern)
 print struct_size
 
 #with open("/unix/creamtea/scopeStuff/test2.ch3.traces","rb") as f:
-with open("/unix/creamtea/scopeStuff/test950V_5V_2p0ns_10mvDiv.ch3.traces","rb") as f:
+#with open("/unix/creamtea/scopeStuff/test950V_5V_5p0ns_100mvDiv.ch3.traces","rb") as f:
+with open("/unix/creamtea/scopeStuff/testToday950V_4.7V_10ns.ch3.traces","rb") as f:
     areaList = []
     while True:
         header = f.read(struct_size)
