@@ -48,7 +48,7 @@ with open(inputFileName,"rb") as f:
         dataList=np.fromfile(f,dt,numSamples)
         sampList=np.arange(numSamples)
         voltList=np.multiply(dataList,v_scale)
-        totVolt+=voltList
+#        totVolt+=voltList
         countThings+=1
         timeList=np.multiply(sampList,h_scale)        
         timeList+=h_off
