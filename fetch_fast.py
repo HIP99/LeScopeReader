@@ -78,7 +78,7 @@ def fetch(filename, nevents, nsequence):
 #                    waveform.from_file(out)
                                         
                     for n in xrange(0,sequence_count):
-                        print "Here",n                    
+#                        print "Here",n                    
                         tempsturct=struct.pack(params_pattern,num_samples,wave_desc['dtype'].itemsize,wave_desc['vertical_offset'], wave_desc['vertical_gain'], -wave_desc['horiz_offset'], wave_desc['horiz_interval'])
                         out.write(tempsturct)
                         traces[n].tofile(out)
