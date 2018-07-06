@@ -8,7 +8,6 @@ import time
 
 import sys
 
-print "Am I even here?"
 inputFileName = str(sys.argv[1])
 outputFileName = inputFileName + ".root"
 print "Input file : ", inputFileName
@@ -43,15 +42,17 @@ with open(inputFileName,"rb") as f:
         h_off=sHeader[4]
         h_scale=sHeader[5]
         dt=np.dtype('>i1')
+#        print v_off
 #        print numSamples
 
         dataList=np.fromfile(f,dt,numSamples)
         sampList=np.arange(numSamples)
         voltList=np.multiply(dataList,v_scale)
+        voltList=voltList-v_off
 #        totVolt+=voltList
         countThings+=1
         timeList=np.multiply(sampList,h_scale)        
-        timeList+=h_off
+        timeList=timeList-h_off
         graphName = "graph" + str(countThings)
 #        print graphName
         graph = TGraph(numSamples, timeList, voltList)
