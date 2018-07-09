@@ -54,8 +54,10 @@ def fetch(filename, nevents, nsequence):
         print 'Using sequence mode with %i traces per aquisition' % sequence_count 
     
     f = {}
+    timef = {} # output file with trigger times
     for channel in channels:
         f[channel] = open('%s.ch%s.traces'%(filename,channel),'wb')
+        timef[channel] = open('%s.ch%s.traces.times'%(filename,channel),'wb')
     params_pattern = '=IBdddd' # (num_samples, sample_bytes, v_off, v_scale, h_off, h_scale, [samples]) ...
     try:
         i = 0
@@ -67,11 +69,16 @@ def fetch(filename, nevents, nsequence):
                 print channels
                 for channel in channels:
                     print channel
-                    wave_desc,wave_array,trig_time_array = scope.get_waveform(channel)
+                    wave_desc,wave_array,trig_time_array,trigger_time,acq_duration = scope.get_waveform(channel)
                     num_samples = wave_desc['wave_array_count']//sequence_count
                     traces = wave_array.reshape(sequence_count, wave_array.size//sequence_count)
                     out = f[channel]
+                    outtime = timef[channel]
                     print num_samples,sequence_count
+                    print trigger_time
+                    print acq_duration
+                    outtime.write(str(trigger_time)+' ')
+                    outtime.write(str(acq_duration)+'\n')
                     #New way of writing files
 #                    waveform=LeCroyWaveformChannel(wave_desc,wave_array,trig_time_array)
 #                    waveform.to_file(out)
@@ -82,6 +89,7 @@ def fetch(filename, nevents, nsequence):
                         tempsturct=struct.pack(params_pattern,num_samples,wave_desc['dtype'].itemsize,wave_desc['vertical_offset'], wave_desc['vertical_gain'], -wave_desc['horiz_offset'], wave_desc['horiz_interval'])
                         out.write(tempsturct)
                         traces[n].tofile(out)
+
                     
             except (socket.error) as e:
                 print '\n' + str(e)
@@ -97,6 +105,7 @@ def fetch(filename, nevents, nsequence):
         for channel in channels:
             print "Closing",channel
             f[channel].close()
+            timef[channel].close()
         scope.clear()
         return i
 

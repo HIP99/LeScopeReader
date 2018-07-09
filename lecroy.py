@@ -162,7 +162,7 @@ class LeCroyScope(object):
     '''
     A class for triggering and fetching waveforms from a LeCroy oscilloscope.
     '''
-    def __init__(self,  host, port=1861, timeout=5.0):
+    def __init__(self,  host, port=1860, timeout=5.0):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((host, port))
         self.sock.settimeout(timeout)
@@ -341,7 +341,7 @@ class LeCroyScope(object):
         wavedesc = self.get_wavedesc(channel)
         if wavedesc['trigtime_array']>0:
             trigTimeArray=self.get_waveform_time(channel,wavedesc['trigtime_array']/16)
-        return (wavedesc, np.fromstring(msg[22:], wavedesc['dtype'], wavedesc['wave_array_count']),trigTimeArray)
+        return (wavedesc, np.fromstring(msg[22:], wavedesc['dtype'], wavedesc['wave_array_count']),trigTimeArray,wavedesc['trigger_time'],wavedesc['acq_duration'])
 
     def get_waveform_time(self,channel,numTimes):
         '''
