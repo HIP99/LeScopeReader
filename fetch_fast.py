@@ -32,7 +32,7 @@ import pickle
 from lecroy import LeCroyScope
 from lecroy import LeCroyWaveformChannel
 
-def fetch(filename, nevents, nsequence):
+def fetch(filename, nevents, nsequence, trigchannel, triglevel):
     '''
     Fetch and save waveform traces from the oscilloscope.
     '''
@@ -42,6 +42,24 @@ def fetch(filename, nevents, nsequence):
     channels = scope.get_channels()
     print channels
     settings = scope.get_settings()
+#    print settings
+
+    print trigchannel, triglevel
+    commands = {}
+    
+    if (trigchannel != 999 ):
+        commands['TRIG_SELECT'] = 'TRSE EDGE,SR,C'+str(trigchannel)+',HT,OFF'
+
+    if (triglevel != 999 ):
+        commands['C2:TRIG_LEVEL'] = 'C2:TRLV '+str(triglevel)+' V,10E-3 V'
+        commands['C3:TRIG_LEVEL'] = 'C3:TRLV '+str(triglevel)+' V,10E-3 V'
+
+    scope.set_settings(commands)
+
+
+    newsettings = scope.get_settings()
+#    print newsettings
+
 
     if 'ON' in settings['SEQUENCE']:
         sequence_count = int(settings['SEQUENCE'].split(',')[1])
@@ -68,15 +86,15 @@ def fetch(filename, nevents, nsequence):
                 scope.trigger()
                 print channels
                 for channel in channels:
-                    print channel
+#                    print channel
                     wave_desc,wave_array,trig_time_array,trigger_time,acq_duration = scope.get_waveform(channel)
                     num_samples = wave_desc['wave_array_count']//sequence_count
                     traces = wave_array.reshape(sequence_count, wave_array.size//sequence_count)
                     out = f[channel]
                     outtime = timef[channel]
-                    print num_samples,sequence_count
-                    print trigger_time
-                    print acq_duration
+#                    print num_samples,sequence_count
+#                    print trigger_time
+#                    print acq_duration
                     outtime.write(str(trigger_time)+' ')
                     outtime.write(str(acq_duration)+'\n')
                     #New way of writing files
@@ -120,6 +138,10 @@ if __name__ == '__main__':
                       help="number of sequential events to capture at a time", default=1)
     parser.add_option("--time", action="store_true", dest="time",
                       help="append time string to filename", default=False)
+    parser.add_option("-c", action="store", type="int", dest="trigchannel",
+                      help="Channel to trigger on", default=999)
+    parser.add_option("-t", action="store", type="float", dest="triglevel",
+                      help="Trigger level in Volts", default=999)
     (options, args) = parser.parse_args()
 
     if len(args) < 1:
@@ -132,7 +154,7 @@ if __name__ == '__main__':
     print 'Saving to file %s' % filename
 
     start = time.time()
-    count = fetch(filename, options.nevents, options.nsequence)
+    count = fetch(filename, options.nevents, options.nsequence, options.trigchannel, options.triglevel)
     elapsed = time.time() - start
     if count > 0:
         print 'Completed %i events in %.3f seconds.' % (count, elapsed)
