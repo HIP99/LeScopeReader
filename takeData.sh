@@ -13,6 +13,12 @@ if [ $# -eq 0 ]
     exit
 fi
 
+if [ ! -d "$basename" ]; then
+    mkdir -p $basename
+    chmod g+w $basename
+fi
+
+
 for ch in `echo $CHANNELS`;
 do
     for thres in `echo $THRESHOLDS`;
