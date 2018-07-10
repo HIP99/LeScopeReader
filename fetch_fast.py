@@ -32,7 +32,7 @@ import pickle
 from lecroy import LeCroyScope
 from lecroy import LeCroyWaveformChannel
 
-def fetch(filename, nevents, nsequence, trigchannel, triglevel):
+def fetch(filename, nevents, nsequence, trigchannel, triglevel, voltdiv):
     '''
     Fetch and save waveform traces from the oscilloscope.
     '''
@@ -42,7 +42,7 @@ def fetch(filename, nevents, nsequence, trigchannel, triglevel):
     channels = scope.get_channels()
     print channels
     settings = scope.get_settings()
-#    print settings
+    print settings
 
     print trigchannel, triglevel
     commands = {}
@@ -53,6 +53,10 @@ def fetch(filename, nevents, nsequence, trigchannel, triglevel):
     if (triglevel != 999 ):
         commands['C2:TRIG_LEVEL'] = 'C2:TRLV '+str(triglevel)+' V,10E-3 V'
         commands['C3:TRIG_LEVEL'] = 'C3:TRLV '+str(triglevel)+' V,10E-3 V'
+
+    if (voltdiv != 999 ):
+        commands['C2:VOLT_DIV'] = 'C2:VDIV '+str(voltdiv)+' V'
+        commands['C3:VOLT_DIV'] = 'C3:VDIV '+str(voltdiv)+' V'
 
     scope.set_settings(commands)
 
@@ -141,7 +145,9 @@ if __name__ == '__main__':
     parser.add_option("-c", action="store", type="int", dest="trigchannel",
                       help="Channel to trigger on", default=999)
     parser.add_option("-t", action="store", type="float", dest="triglevel",
-                      help="Trigger level in Volts", default=999)
+                      help="Trigger level in volts", default=999)
+    parser.add_option("-d", action="store", type="float", dest="voltdiv",
+                      help="Divisions in volts", default=999)
     (options, args) = parser.parse_args()
 
     if len(args) < 1:
@@ -154,7 +160,7 @@ if __name__ == '__main__':
     print 'Saving to file %s' % filename
 
     start = time.time()
-    count = fetch(filename, options.nevents, options.nsequence, options.trigchannel, options.triglevel)
+    count = fetch(filename, options.nevents, options.nsequence, options.trigchannel, options.triglevel, options.voltdiv)
     elapsed = time.time() - start
     if count > 0:
         print 'Completed %i events in %.3f seconds.' % (count, elapsed)
