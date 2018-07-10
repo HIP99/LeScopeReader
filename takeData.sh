@@ -1,7 +1,7 @@
 #!/bin/bash
 
 basename=$1
-ntot=10000
+ntot=2000
 sequence=50
 THRESHOLDS="10 15 20 25"
 CHANNELS="2 3"
