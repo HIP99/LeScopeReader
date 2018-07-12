@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-for f in `ls $1/*ch[23].traces`; do
+for f in `ls $1/*ch[234].traces`; do
     echo "File is $f"
     FILE=$f.root     
     if [ -f $FILE ]; then
@@ -13,7 +13,7 @@ for f in `ls $1/*ch[23].traces`; do
 done
 
 
-for f in `ls $1/*/*ch[23].traces`; do
+for f in `ls $1/*/*ch[234].traces`; do
     echo "File is $f"
     FILE=$f.root     
     if [ -f $FILE ]; then
@@ -24,7 +24,7 @@ for f in `ls $1/*/*ch[23].traces`; do
     fi    
 done
 
-for f in `ls $1/*/*/*ch[23].traces`; do
+for f in `ls $1/*/*/*ch[234].traces`; do
     echo "File is $f"
     FILE=$f.root     
     if [ -f $FILE ]; then
