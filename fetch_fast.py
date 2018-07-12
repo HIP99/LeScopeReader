@@ -53,10 +53,12 @@ def fetch(filename, nevents, nsequence, trigchannel, triglevel, voltdiv):
     if (triglevel != 999 ):
         commands['C2:TRIG_LEVEL'] = 'C2:TRLV '+str(triglevel)+' V,10E-3 V'
         commands['C3:TRIG_LEVEL'] = 'C3:TRLV '+str(triglevel)+' V,10E-3 V'
+        commands['C4:TRIG_LEVEL'] = 'C4:TRLV '+str(triglevel)+' V,10E-3 V'
 
     if (voltdiv != 999 ):
         commands['C2:VOLT_DIV'] = 'C2:VDIV '+str(voltdiv)+' V'
         commands['C3:VOLT_DIV'] = 'C3:VDIV '+str(voltdiv)+' V'
+        commands['C4:VOLT_DIV'] = 'C4:VDIV '+str(voltdiv)+' V'
 
     scope.set_settings(commands)
 
