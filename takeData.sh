@@ -3,7 +3,7 @@
 basename=$1
 ntot=2000
 sequence=100
-THRESHOLDS="10 15 20 25"
+THRESHOLDS="10 15 20"
 CHANNELS="3 4"
 div=20
 
