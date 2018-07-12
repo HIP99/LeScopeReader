@@ -2,9 +2,9 @@
 
 basename=$1
 ntot=2000
-sequence=50
+sequence=100
 THRESHOLDS="10 15 20 25"
-CHANNELS="2 3"
+CHANNELS="3 4"
 div=20
 
 if [ $# -eq 0 ]
