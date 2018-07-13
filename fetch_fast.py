@@ -51,9 +51,9 @@ def fetch(filename, nevents, nsequence, trigchannel, triglevel, voltdiv):
         commands['TRIG_SELECT'] = 'TRSE EDGE,SR,C'+str(trigchannel)+',HT,OFF'
 
     if (triglevel != 999 ):
-        commands['C2:TRIG_LEVEL'] = 'C2:TRLV '+str(triglevel)+' V,10E-3 V'
-        commands['C3:TRIG_LEVEL'] = 'C3:TRLV '+str(triglevel)+' V,10E-3 V'
-        commands['C4:TRIG_LEVEL'] = 'C4:TRLV '+str(triglevel)+' V,10E-3 V'
+        commands['C2:TRIG_LEVEL'] = 'C2:TRLV '+str(triglevel)+' V'
+        commands['C3:TRIG_LEVEL'] = 'C3:TRLV '+str(triglevel)+' V'
+        commands['C4:TRIG_LEVEL'] = 'C4:TRLV '+str(triglevel)+' V'
 
     if (voltdiv != 999 ):
         commands['C2:VOLT_DIV'] = 'C2:VDIV '+str(voltdiv)+' V'
