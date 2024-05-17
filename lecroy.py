@@ -165,7 +165,7 @@ class LeCroyScope(object):
     def __init__(self,  host, port=1861, timeout=5.0):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((host, port))
-        self.sock.settimeout(timeout)
+        self.sock.settimeout(timeout)   
         self.clear()
         self.send('comm_header short')
         self.check_last_command()
@@ -245,7 +245,7 @@ class LeCroyScope(object):
         Sends a `settings` dict of Command->Setting to the scope.
         '''
         for command, setting in settings.items():
-            print 'sending %s' % command
+            # print 'sending %s' % command
             self.send(setting)
             self.check_last_command()
 
@@ -339,8 +339,12 @@ class LeCroyScope(object):
         if not int(msg[1]) == channel:
             raise RuntimeError('waveforms out of sync or comm_header is off.')
         wavedesc = self.get_wavedesc(channel)
+
+        
+        trigTimeArray = 0
         if wavedesc['trigtime_array']>0:
             trigTimeArray=self.get_waveform_time(channel,wavedesc['trigtime_array']/16)
+        # trigTimeArray = 0
         return (wavedesc, np.fromstring(msg[22:], wavedesc['dtype'], wavedesc['wave_array_count']),trigTimeArray,wavedesc['trigger_time'],wavedesc['acq_duration'])
 
     def get_waveform_time(self,channel,numTimes):
@@ -391,17 +395,17 @@ class LeCroyWaveformChannel(object):
         for name, pos, datatype in wavedesc_template:
            # print name,self.wavedesc[name]
             if datatype in (String, UnitDefinition):
-                print self.wavedesc[name],datatype.length,len(self.wavedesc[name])
+                print(self.wavedesc[name],datatype.length,len(self.wavedesc[name]))
             elif datatype in (TimeStamp,):
                 self.buffer+=struct.pack(endian+datatype.packfmt, *list(self.wavedesc[name]))
             else:
                 self.buffer+=struct.pack(endian+datatype.packfmt, self.wavedesc[name])
 
         out.write(self.buffer)
-        print len(self.waveform)
+        print(len(self.waveform)) 
         self.waveform.tofile(out)
 
-        print len(self.trigTimeArray)
+        print(len(self.trigTimeArray))
         self.trigTimeArray.tofile(out)
 
 
